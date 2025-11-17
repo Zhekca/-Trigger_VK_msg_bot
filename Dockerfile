@@ -1,6 +1,6 @@
-FROM python:3.11-slim
-WORKDIR /app
+FROM python:3.6
 COPY . /app
-RUN pip install --no-cache-dir -r requirements.txt
-CMD ["python", "main.py"]
-EXPOSE 8080
+WORKDIR /app
+RUN pip install -r requirements.txt
+EXPOSE 8000
+CMD ["python", "app.py"]
