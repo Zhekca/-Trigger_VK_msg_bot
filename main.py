@@ -8,7 +8,6 @@ import requests
 
 TELEGRAM_TOKEN = "TELEGRAM_TOKEN"
 VK_TOKEN = "VK_TOKEN"
-
 CHAT_IDS = ["CHAT_IDS"] 
 GROUP_ID = GROUP_ID       
 
