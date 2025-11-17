@@ -1,33 +1,59 @@
-import os
+# -*- coding: utf-8 -*-
+
 import time
+import json
 import vk_api
-from vk_api.longpoll import VkLongPoll, VkEventType
+from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 import requests
 
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-VK_TOKEN = os.getenv("VK_TOKEN")
-CHAT_IDS = os.getenv("CHAT_IDS", "").split(",")
+TELEGRAM_TOKEN = "TELEGRAM_TOKEN"
+VK_TOKEN = "VK_TOKEN"
 
-GROUP_ID = int(os.getenv("GROUP_ID")) 
+CHAT_IDS = ["CHAT_IDS"] 
+GROUP_ID = GROUP_ID       
 
 vk_session = vk_api.VkApi(token=VK_TOKEN)
 longpoll = VkBotLongPoll(vk_session, GROUP_ID)
 vk = vk_session.get_api()
 
+
 def send_telegram(text):
+    link = "https://vk.com/gim211587219"
+
+    reply_markup = {
+        "inline_keyboard": [
+            [
+                {"text": "Открыть", "url": link}
+            ]
+        ]
+    }
+
     for chat_id in CHAT_IDS:
-        chat_id = chat_id.strip()
-        if not chat_id:
-            continue
         requests.get(
             f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
-            params={"chat_id": chat_id, "text": text}
+            params={
+                "chat_id": chat_id,
+                "text": text,
+                "parse_mode": "HTML",
+                "reply_markup": json.dumps(reply_markup)
+            }
         )
+
 
 print("Бот запущен...")
 
+
 for event in longpoll.listen():
     if event.type == VkBotEventType.MESSAGE_NEW:
-        msg_text = event.obj.message["text"]
-        from_user = event.obj.message["from_id"]
-        send_telegram(f"Новое сообщение в сообществе от {from_user}:\n\n{msg_text}")
+        msg = event.obj.message
+        msg_text = msg.get("text", "")
+        from_user_id = msg.get("from_id", "")
+
+
+        user_info = vk.users.get(user_ids=from_user_id)
+        first_name = user_info[0].get("first_name", "")
+        last_name = user_info[0].get("last_name", "")
+
+        telegram_text = f"{first_name} {last_name}:\n{msg_text}"
+
+        send_telegram(telegram_text)
